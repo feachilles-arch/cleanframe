@@ -259,6 +259,21 @@ try {
     await scene('home'); await act('home.app.netflix'); await current.waitForFunction(() => ShoreQA.where().view === 'message');
     check('Launch failure is shown', /could not|unavailable|try again/i.test(await current.locator('#stage').innerText()));
   });
+  await run('Fresh install keeps only installed default apps', async () => {
+    const installed = ['org.tizen.netflix-app', 'MCmYXNxgcu.DisneyPlus', '9Ur5IzDKqV.TizenYouTube'];
+    await page({ seed: undefined, catalog: CATALOG.filter(a => installed.includes(a.id) || a.id === EXTRA) });
+    await current.waitForFunction(() => ShoreQA.state().dock.length === 3);
+    let s = await state();
+    check('Missing regional defaults leave Home in default order', same(s.dock, ['netflix', 'disneyplus', 'youtube']) && s.lastApp === 'netflix', s.dock);
+    check('Fitted Home is saved', same((await stored()).dock, ['netflix', 'disneyplus', 'youtube']));
+    check('Fitted Home keeps a single focus on the first app', (await call('where')).focusAction === 'home.app.netflix', await call('where'));
+    await current.reload(); await ready();
+    check('A saved Home is never refitted', same((await state()).dock, ['netflix', 'disneyplus', 'youtube']));
+    await closePage();
+    await page({ seed: undefined, catalog: [{ id: SPOTIFY, name: 'Spotify', show: true, iconPath: '' }, { id: EXTRA, name: 'Family TV', show: true, iconPath: '' }] });
+    await current.waitForFunction(() => ShoreQA.state().dock.length === 2);
+    check('Without any default app, Home starts with installed apps', same((await state()).dock, ['AbCdEf1234.FamilyApp', SPOTIFY]), (await state()).dock);
+  });
   await run('Catalogue failure and retry', async () => {
     await page({ catalogFailure: true }); await library();
     check('Catalogue failure leaves Home intact', same((await state()).dock, PRIMARY));
