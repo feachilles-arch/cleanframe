@@ -1,27 +1,22 @@
 """Connect, inspect, install or launch CleanFrame. These commands preserve Home/startup settings."""
 import argparse
 import hashlib
-import ipaddress
-import json
-from pathlib import Path
+import re
 import subprocess
 import time
 import xml.etree.ElementTree as XML
 
-ROOT = Path(__file__).resolve().parents[1]
+from tizen_tools import ROOT, config, host, tool
+
 parser = argparse.ArgumentParser()
-parser.add_argument('action', choices=['info', 'install', 'launch'])
+parser.add_argument('action', choices=['info', 'apps', 'install', 'launch'])
 parser.add_argument('--host')
 args = parser.parse_args()
-config_file = ROOT / '.local/device.json'
-config = json.loads(config_file.read_text()) if config_file.exists() else {}
-host = args.host or config.get('host')
-if not host:
-    raise SystemExit('Add the TV address to .local/device.json or pass --host.')
-ipaddress.ip_address(host)
-sdb = ROOT / '.local/tizen-sdk/tools/sdb'
-if not sdb.exists():
-    raise SystemExit('Local SDB tool missing. See docs/development.md.')
+settings = config()
+address = host(settings, args.host)
+_, sdb = tool(settings, 'tools/sdb')
+if not sdb:
+    raise SystemExit('SDB not found. Install Samsung\'s TV SDK (Tizen Studio) or set "sdk" in .local/device.json. See SETUP-DE.md.')
 manifest = XML.parse(ROOT / 'app/config.xml').getroot()
 app_id = manifest.find('{http://tizen.org/ns/widgets}application').get('id')
 
@@ -36,12 +31,20 @@ def run(*command, quiet=False):
     return output
 
 
-serial = host + ':26101'
+serial = address + ':26101'
 connected = run('connect', serial)
 if 'connected to ' not in connected.lower() and 'already connected' not in connected.lower():
-    raise SystemExit('TV connection was not confirmed.')
+    raise SystemExit('TV connection was not confirmed. Check Developer Mode, the Host PC IP and that both devices share a network.')
 if args.action == 'info':
     run('-s', serial, 'capability')
+elif args.action == 'apps':
+    # Read-only: lists installed app IDs so Home shortcuts can use this TV's real IDs.
+    listing = run('-s', serial, 'shell', '0', 'applist', quiet=True)
+    rows = re.findall(r"'([^']*)'\s+'([A-Za-z0-9][\w.-]+)'", listing)
+    for name, identifier in sorted(rows, key=lambda row: row[0].lower()):
+        print(identifier.ljust(48) + name)
+    if not rows:
+        print(listing)
 elif args.action == 'launch':
     output = run('-s', serial, 'shell', '0', 'execute', app_id)
     if 'successfully launched' not in output:

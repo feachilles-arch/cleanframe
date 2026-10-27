@@ -10,8 +10,13 @@ manifest = XML.parse(app / 'config.xml').getroot()
 ns = {'w': 'http://www.w3.org/ns/widgets', 't': 'http://tizen.org/ns/widgets'}
 identity = manifest.find('t:application', ns)
 assert identity is not None, 'Missing application identity'
-assert identity.get('package') == 'nClrkHome1', 'Keep the installed package identity stable'
-assert identity.get('id') == 'nClrkHome1.FrameHome', 'Keep the installed application ID stable'
+# Each installation owns its identity. Keep it stable once installed, and keep every copy in step.
+package_id, app_id = identity.get('package', ''), identity.get('id', '')
+assert re.fullmatch(r'[A-Za-z0-9]{10}', package_id), 'Package ID must be 10 letters or digits'
+assert re.fullmatch(re.escape(package_id) + r'\.[A-Za-z0-9]{1,52}', app_id), 'Application ID must be <package>.<name>'
+assert "var SELF = '" + app_id + "'" in (app / 'device.js').read_text(), 'device.js SELF must match config.xml'
+native = (root / 'scripts/native-home/Control.cs').read_text()
+assert 'Target="' + app_id + '"' in native and '/opt/usr/apps/' + package_id + '"' in native, 'Native helper target must match config.xml'
 assert manifest.get('version') == json.loads((root / 'package.json').read_text())['version'], 'Manifest/package versions differ'
 for tag in ['content', 'icon']:
     node = manifest.find('w:' + tag, ns)
