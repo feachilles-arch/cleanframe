@@ -1,4 +1,4 @@
-# Interaction behaviour — 0.6.1
+# Interaction behaviour — 0.7.0
 
 ## Home
 
@@ -50,6 +50,8 @@ Open the editor from Settings or All apps. On Home shows the current order on th
 - Add: OK on an app in Not on Home adds it and saves. A recently removed app returns to its previous position within the editing session; another app is added at the end. Focus follows the app to its Remove from Home control, so another OK can reverse the addition.
 - Undo reverses a completed addition, removal or reorder from the current editing session. Done or Back closes the editor and keeps completed changes. Undo history ends when the editor closes.
 
+On a new installation (no saved preferences), CleanFrame reads the installed apps once at startup. Home keeps the default apps that are installed, in their default order; when none are installed it starts with the first five installed apps alphabetically. Saved Home choices are never changed by discovery.
+
 Removing the last Home app or adding a tenth app is prevented. A failed storage write keeps the committed choices and order, with a retry message. Saved native app IDs and names survive a restart or a failed catalogue refresh.
 
 ## Art Mode and Samsung screens
@@ -79,8 +81,12 @@ Launcher wallpaper is separate from native Art Mode. Runtime photos, materials a
 
 The native Home operation and startup configuration from 19 October remain separate from this app update. Home from Netflix was confirmed for that configuration; power-on after Netflix remains provisional. Streaming apps retain their own Back navigation. Netflix did not exit on repeated Back in the observed test, so there was no app-exit destination to verify. No global Back interception or key-filter hook was installed. See [TV status](tv-status.md) for device evidence; this behaviour specification is not an installation or visual-verification record for 0.6.0.
 
+## Language
+
+The interface follows `navigator.language`. German TVs get a German interface, including wallpaper names and device messages; every other language falls back to English. App and font names are not translated.
+
 ## Clock and rendering
 
-Both layouts show the TV's local time in 12-hour format, without AM/PM or seconds. It updates at the minute boundary and on return to the launcher. No date or clock panel is shown.
+Both layouts show the TV's local time without seconds: 12-hour format without AM/PM in English, 24-hour format in German. It updates at the minute boundary and on return to the launcher. No date or clock panel is shown.
 
 Photographic materials and blurred panel backgrounds are generated before packaging and stay aligned with the full-screen image. Photo colour and contrast metadata are also prepared offline. Navigation does not sample image pixels, run an optics engine or apply live backdrop blur. Flat backgrounds use matching light or dark panel colours. Focus feedback uses transforms and opacity; reduced motion removes animated scaling and movement while retaining opacity feedback.

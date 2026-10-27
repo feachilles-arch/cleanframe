@@ -12,7 +12,8 @@ All UI assets, public fonts and the fifteen wallpapers are bundled. This private
 
 ## Runtime map and compatibility
 
-- `app/index.html` loads the device adapter, gallery/font/palette catalogues, `assets/icons/metrics.js` and `main.js`, with `style.css`.
+- `app/index.html` loads `assets/strings.js`, the device adapter, gallery/font/palette catalogues, `assets/icons/metrics.js` and `main.js`, with `style.css`.
+- `assets/strings.js` maps the English source text to other languages, selected from `navigator.language` (the TV menu language). English is the fallback and uses a 12-hour clock; German uses a 24-hour clock. Add new visible text in English through `T()`/`F()` and give it a German entry; `npm run check:german` fails on visible English leftovers or text that no longer fits.
 - `main.js` owns the List and Dock layouts, panel stack, focus, preferences and wallpaper timers. `device.js` owns installed-app discovery and Tizen calls. Keep device details in that adapter.
 - The logical stage is 1920 x 1080, scaled uniformly to the viewport. Check at 1920 x 1080 and 1280 x 720. Glass geometry and cached materials must stay aligned.
 - Preferences use localStorage key `cleanframe.home.v1`, with a fallback read from `cleanframe.shore.v1`. Legacy fields are `dock`, `wallpaper`, `mode`, `lastApp` and `theme`. The 0.6 migration preserves app order, wallpaper, rotation and selection. Legacy `list` becomes Dark / List / Type; `shore` and `grid` become Photo / Dock / Glass. Appearance axes are stored separately. A saved dynamic app keeps its real app ID and name; discovery refreshes the installed catalogue. Keep migration checks when changing this format.
@@ -48,8 +49,10 @@ For new certificates, use Samsung's [certificate setup](https://developer.samsun
 Create `.local/device.json` with:
 
 ```json
-{"host": "YOUR_TV_IP_ADDRESS"}
+{"host": "YOUR_TV_IP_ADDRESS", "profile": "YOUR_CERTIFICATE_PROFILE"}
 ```
+
+`scripts/tizen_tools.py` finds the SDK in `.local/tizen-sdk`, then `~/tizen-studio` (override with `"sdk"`). Without the reference machine's `.local/certificates/private/`, `npm run package` signs with the named Certificate Manager profile and lets the SDK prompt in the terminal. TV commands accept only private-network addresses. `npm run tv:apps` lists installed app IDs read-only.
 
 For developer access, connect the TV and Mac to the same network, enable Developer Mode in Apps → App Settings → 12345 and enter the Mac's local address. Fully restart the TV if the developer port remains closed.
 

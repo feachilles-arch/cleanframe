@@ -2,6 +2,8 @@
 
 A quieter home screen for Samsung The Frame. Your apps, a photograph and the time, with an interface made for the TV remote.
 
+**Deutsch:** Eine vollständige Einrichtungs- und Bedienungsanleitung auf Deutsch, inklusive Werbung und Datenschutz am Fernseher, steht in [SETUP-DE.md](SETUP-DE.md).
+
 ![CleanFrame browser preview using the bundled Manrope font](docs/images/cleanframe-dock.jpg)
 
 I built CleanFrame for one TV: my own Samsung The Frame, running Tizen. I'm sharing the code and setup notes as a starting point for other people to build on.
@@ -32,6 +34,8 @@ The public preview uses the included Manrope, Geist and Newsreader fonts.
 - Adjust typography, focus and glass materials through the same Settings interface.
 - Choose and reorder Home apps; discover installed apps on the TV.
 - Select from fifteen wallpapers and save your preferences locally.
+- The interface follows the TV's menu language: English (12-hour clock) or German (24-hour clock).
+- A new installation keeps only the default apps the TV actually has installed.
 
 The glass and blur are rendered ahead of time. The TV loads the finished images and uses transforms and opacity for focus feedback.
 
@@ -73,11 +77,12 @@ The detailed [device record](docs/tv-status.md) separates observed results from 
 npm run check
 npx playwright install chromium
 CLEANFRAME_PUBLIC_FONTS=1 npm run check:browser
+CLEANFRAME_PUBLIC_FONTS=1 npm run check:german
 npm run check:public
 npm run export:public
 ```
 
-The browser checks use isolated Chromium profiles and a loopback preview. They never contact a TV. The public export creates `dist/CleanFrame-public-unsigned.wgt`, with public fonts and notices. It needs your own identity and signing before installation. It does not certify asset redistribution rights or device compatibility.
+The browser checks use isolated Chromium profiles and a loopback preview. They never contact a TV. Set `CLEANFRAME_CHROMIUM` to an installed Chromium if Playwright's own download is unavailable. The public export creates `dist/CleanFrame-public-unsigned.wgt`, with public fonts and notices. It needs your own identity and signing before installation. It does not certify asset redistribution rights or device compatibility.
 
 | Location | Purpose |
 | --- | --- |

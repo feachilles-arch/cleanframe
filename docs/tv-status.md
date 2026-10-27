@@ -14,7 +14,11 @@ Recorded through 20 October 2026. These results describe the maintainer's TV. Ot
 
 Developer Mode is enabled. The developer connection needed a full mains power cycle after enabling it. Network address, device identifier, signing material and diagnostic dumps are private local configuration.
 
-## Current app and identity
+## This installation's identity
+
+This copy uses its own identity, `CW0mNcEgJ4.CleanFrame` (package `CW0mNcEgJ4`), so it never replaces the maintainer's installation. Version 0.7.0 with this identity has not been installed on any TV yet; nothing below describes it. The German interface, 24-hour clock and first-run app fitting are browser-verified only.
+
+## Current app and identity (reference TV)
 
 CleanFrame 0.6.1 was signed, installed in place and launched on 20 October. The SDK reported installation complete, retained the app in its installed list and returned a successful launch. The author certificate and application identity stayed stable. The original Home/startup recovery snapshot and previous signed 0.6.0 package remain local.
 
